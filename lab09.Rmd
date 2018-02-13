@@ -65,18 +65,20 @@ add annotations to an axis that uses time as a component.
 ```{r}
 ggplot(murder, aes(state, murders_2014)) +
   geom_point(color="grey") +
-  geom_point(aes(state, murders_2015), color="salmon") +
   xlab("States") +
   ylab("Murder Rates") +
   ggtitle("Murder Rates for 2014/2015 By States") +
-  annotate("text", x="Illinois", y=468, label="Chicago, IL") +
-  annotate("text", x="Maryland", y=334, label="Baltimore, MD") +
+  annotate("text", x="Illinois", y=505, label="Chicago, IL") +
+  annotate("text", x="Maryland", y=365, label="Baltimore, MD") +
   annotate("text", x="New York", y=372, label="New York, NY") +
-  annotate("text", x="Michigan", y=285, label="Detriot, MI") +
-  annotate("text", x="Texas", y=313, label="Houston, TX") +
+  annotate("text", x="Michigan", y=310, label="Detriot, MI") +
+  annotate("text", x="Texas", y=320, label="Houston, TX") +
   annotate("rect", xmin="Hawaii", xmax="Indiana", ymin=400, ymax=500, fill="blue", alpha=0.075) +
   annotate("rect", xmin="Louisiana", xmax="Massachusetts", ymin=190, ymax=360, fill="blue", alpha=0.075) +
-  annotate("rect", xmin="Massachusetts", xmax="Minnesota", ymin=280, ymax=300, fill="blue", alpha=0.075)
+  annotate("rect", xmin="Massachusetts", xmax="Minnesota", ymin=280, ymax=300, fill="blue", alpha=0.075) +
+  annotate("rect", xmin="New Mexico", xmax="North Carolina", ymin=320, ymax=365, fill="blue", alpha=0.075) +
+  annotate("rect", xmin="Tennessee", xmax="Virginia", ymin=225, ymax=315, fill="blue", alpha=0.075) +
+    geom_point(aes(state, murders_2015), color="salmon") 
 ```
 
 
