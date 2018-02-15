@@ -1,0 +1,121 @@
+---
+title: "Lab 10: Filtering Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(fig.height = 5)
+knitr::opts_chunk$set(fig.width = 8.5)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(viridis)
+theme_set(theme_minimal())
+```
+
+## Pick a dataset
+
+Today you will again have a choice of three datasets to work with. You can
+choose either to investigate the daily team ELO ratings in the NBA:
+
+```{r}
+nba <- read_csv("https://statsmaths.github.io/stat_data/nba_elo_daily.csv")
+```
+
+Metadata from US senator's tweets:
+
+```{r}
+tweets <- read_csv("https://statsmaths.github.io/stat_data/senator_tweets_meta.csv")
+```
+
+Or swear words given in the movies of Quentin Tarantino:
+
+```{r}
+tarantino <- read_csv("https://statsmaths.github.io/stat_data/tarantino.csv")
+```
+
+Pick a dataset (feel free to delete the others from the Rmd file if you would
+like), and work on the instructions in the next section.
+
+## Instructions
+
+This lab is similar to the last. You'll pick a dataset and then generate an
+analysis of that data using data visualizations. The difference here is that
+instead of a single plot, I would like you to construct 3-4 plots that
+together tell a linear story. Each plot should be separated by a sentence or
+two describing what the viewer should take away from the plot. Try to keep the
+plots similar in some way; perhaps each simply highlights a different subset
+of the data but has the same underlying layers.
+
+Notice that each of the datasets for today are larger than you will probably
+be able to use. You will need to filter the data to a particular team, year,
+subset of curse words. You may further filter the data to highlight an even
+smaller subset of the data within each plot.
+
+## Analysis
+
+Tarantino is known for his dramaticized action scenes and also his rather colorful language. In this project, we will be analyzing the number of curse words that Tarantino uses in a variety of his movies. First, lets just look at the amount of curse words in his movies. 
+
+```{r}
+ggplot(tarantino, aes(movie, word)) +
+  geom_point() +
+  geom_point(aes(color=word), size=2)
+```
+
+This isn't the plots for the project but I was curious. 
+
+Now, lets see in what movies he says "fuck" or a variation of "fuck" in his movies!!
+
+```{r}
+fucks <- filter(tarantino, word %in% c("fuck", "fucked", "fucker", "fuckers", "fuckface", "fuckhead", "fucking", "fucks", "fuckup"))
+```
+
+```{r}
+ ggplot(fucks, aes(movie, word)) +
+  geom_point() +
+  geom_point(aes(color=word), size=2)
+```
+
+As you can clearly see, the word "fuck" appeared in all of Tarantino's listed movies. Lets also see how often and when these cuss words appeared. 
+
+```{r}
+ggplot(fucks, aes(movie, minutes_in)) +
+  geom_point() +
+  geom_point(aes(color=word), size=2) +
+  xlab("Word") +
+  ylab("Minutes into the Movie") 
+```
+
+More specifically, lets see when the word "fuck" is used. 
+
+```{r}
+just_fuck <- filter(fucks, word=="fuck")
+```
+
+```{r}
+ggplot(just_fuck, aes(movie, minutes_in)) +
+  geom_point(aes(color=movie), size=2) +
+  xlab("Movie") +
+  ylab("Minutes into Movie")
+```
+
+That is a lot of "fucks." Lets zoom in closer, to see how many times he says it in the first 10 minutes of his movies. 
+
+```{r}
+ten_mins <- filter(just_fuck, minutes_in<=10.00)
+```
+
+```{r}
+ggplot(ten_mins, aes(movie, minutes_in)) +
+  geom_point(aes(color=movie), size=2) +
+  xlab("Movie") +
+  ylab("Minutes into the Movie")
+```
+
+Honestly, this is a lot less than what I had expected to see. There were only two movies in which he cursed in the first ten minutes. 
