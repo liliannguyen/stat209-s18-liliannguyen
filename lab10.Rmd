@@ -88,7 +88,7 @@ As you can clearly see, the word "fuck" appeared in all of Tarantino's listed mo
 ggplot(fucks, aes(movie, minutes_in)) +
   geom_point() +
   geom_point(aes(color=word), size=2) +
-  xlab("Word") +
+  xlab("Movie") +
   ylab("Minutes into the Movie") 
 ```
 
