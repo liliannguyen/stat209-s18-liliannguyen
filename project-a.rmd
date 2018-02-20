@@ -1,0 +1,147 @@
+---
+title: "BuzzFeed Quizzes"
+author: "Lilian Nguyen"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+library(readr)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+```
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Buzzfeed Quizzes
+
+## Overview
+
+Quizzes are a pinacle aspect of the wildly sucessful online website, "BuzzFeed." As a result, I decided to explore some characteristics of these quizzes, such as the gender of the writer and the number of questions in each quiz. This was done by examining the 75 most recent Buzzfeed quizzes and recording a variety of characteristics regarding the quizzes. The research question is what qualities are common among the popular Buzzfeed quizzes.
+
+## Data dictionary
+
+Here is a data dictionary for the BuzzFeed Quizzes dataset:
+
+- **name_of_quiz**: a character variable giving the full title of the quiz
+- **gender**: a categorical variable giving the gender of the quiz writer. The gender of the writer was stated on the writers' profiles. If the author did not explicitly state his or her gender, their gender was assumed to be "unknown." Otherwise, the gender was stated as either "Male" or "Female."
+- **class**: a categorical variable listing the category that the BuzzFeed writers placed the quiz into. The possible categories, as provided by Buzzfeed, are: 
+    - "Can We Guess?"
+    - "Disney"
+    - "Food"
+    - "Would You Rather?"
+    - "Who Are You?"
+    - "Love"
+    - "Trivia"
+- **quest**: a numerical variable describing the total number of questions on each quiz. 
+- **comm**: a numerical variable decribing the total number of comments left by users who took the quiz. Because this number is subject to change as more users take the quiz, it is the total number of comments as of February 9, 2018. 
+- **topic**: a caterorical variable, describing the primary topic of the quiz. This differs from the variable "class", as the topics are more specific to the quiz. The possible topics, as provided by me, are:
+    - "Celebrity"
+    - "Astrology"
+    - "Home"
+    - "Romance"
+    - "Technology"
+    - "Entertainment"
+    - "Food"
+    - "Personality"
+    - "Trivia"
+    - "Makeup"
+
+Which can be read in as follows:
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+buzz <- read_csv("https://raw.githubusercontent.com/URstats/stat209-s18-liliannguyen/master/project_a.csv")
+buzz
+```
+
+## Exploratory Analysis
+
+Due to the number of "views" for a quiz being unaccessible, I decided to use the number of comments to indicate the popularity of a quiz. The graph below demonstrates which classification of quizzes is most popular for the quiz-takers. 
+
+```{r, echo=FALSE}
+ggplot(buzz, aes(class, numb_of_comments)) +
+  geom_point(aes(color=class), size=2) +
+  ylab("Number of Comments") +
+  xlab("Classification of Quiz") +
+  ggtitle("Popularity of Quiz Type") +
+  annotate("text", x="Can We Guess?", y=95, label="Birthday Based On The '00s Playlist", size=1.25) +
+  labs(color="Classification of Quizzes") 
+```
+
+Interestingly, the category "Can We Guess?" is the category that the most popular quiz belonged to. The second quiz with the most comments was found in the classification, "Who Are You?". Therefore, I decided to examine these two categories more closely. 
+
+However, it is important to note that there is no significantly correlation between classification of the quiz and the number of comments left. 
+
+```{r, echo=FALSE}
+pop_quiz <- filter(buzz, class %in% c("Can We Guess?", "Who Are You?"))
+```
+
+```{r, echo=FALSE}
+ggplot(pop_quiz, aes(numb_of_questions, numb_of_comments)) +
+  geom_point(aes(color=class), size=2) +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) +
+  ylab("Number of Comments") +
+  xlab("Number of Questions") +
+  ggtitle("Popularity by Quiz Length") +
+  labs(color="Classification of Quizzes") 
+```
+
+Despite the narrowing of the dataset, there is still no correlation to be seen. Therefore, I decided to examine if quiz topic could be used to estimate the popularity of the quizzes. 
+
+```{r, echo=FALSE}
+ggplot(buzz, aes(topic, numb_of_comments)) +
+  geom_point(aes(color=class), size=2) +
+  xlab("Topic") +
+  ylab("Number of Comments") +
+  ggtitle("Popularity by Quiz Topic") +
+  labs(color = "Classification of Quizzes") +
+  annotate("rect", xmin="Makeup", xmax="Romance", ymin=45, ymax=100, fill="blue", alpha=.10) +
+  annotate("rect", xmin="Celebrity", xmax="Fashion", ymin=45, ymax=55, fill="blue", alpha=.10) 
+```
+
+The top 5, most popular quizzes are highlighted. It appears that the most popular quizzes were those that dealt with the topic of "Personality." As one can see, this topic contains various classifications that were provided by BuzzFeed. However, there appears to be no correlation between the topic and its popularity, as some quizzes in the "Personality" topic have few comments. 
+
+As my classification of the different quizzes was more specific than the BuzzFeed's classification, I decided to use my own classification for the remainder of this study. 
+
+Next, I decided to examine the number of questions to the popularity of the quiz.   Of those recorded, Buzzfeed quizzes have a minimum of 5 questions. I wanted to see if the number of questions correlated to its popularity.
+
+```{r, echo=FALSE}
+ggplot(buzz, aes(numb_of_questions, numb_of_comments)) +
+  geom_point(aes(color=topic), size=2) +
+  ylab("Number of Comments") +
+  xlab("Number of Questions") +
+  ggtitle("Popularity and Quiz Length") +
+  labs(color = "Topic of Quizzes")
+```
+
+As demonstrated by the graph above, there appears to be no significant correlation between the number of questions and the number of comments. Therefore, I concluded that there is no correlation between number of questions per quiz and its popularity.
+
+With no concrete correlation between the popularity of the quizzes and another variable, I  wanted to see if a correlation between the gender of the quiz writer and the popularity of the quiz exist.
+
+```{r, echo=FALSE}
+ggplot(buzz, aes(gender,numb_of_comments)) +
+  geom_point(aes(color=class)) +
+  xlab("Gender of Quiz Writer") +
+  ylab("Number of Comments") +
+  ggtitle("Popularity and Gender") +
+  labs(color="Classification of Quizzes")
+```
+
+As seen above, most of the quizzes were written by females. It is also evident that the most popular quizzes were written by females. 
+
+## Conclusion
+
+From the data above, it appears that there is there is no real correlation between any of the qualities explored and its popularity. However, due to the amount of views being unavailable, it is possible that the use of "number of comments" to measure popularity is inaccurate. If this study was done again, I would attempt to find the number of views for each quiz. 
+
+The lack of a significant correlation was not too surprising. BuzzFeed, a company known for its erraticism, constantly releases hundreds of quizzes daily, covering varying topics. Therefore, its secret to success may not be discerned.  
+
+## References
+
+Buzzfeed, web. Accessed 9 Feb. 2018. (https://www.buzzfeed.com)
+
+
