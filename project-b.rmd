@@ -2,10 +2,10 @@
 title: "The South"
 author: "Lilian Nguyen"
 output:
+  word_document: default
+  html_notebook: default
   html_document:
     df_print: paged
-  html_notebook: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
@@ -19,6 +19,7 @@ knitr::opts_chunk$set(dpi = 300)
 
 library(readr)
 library(rgdal)
+library(ggrepel)
 library(ggplot2)
 library(dplyr)
 library(ggmap)
@@ -31,7 +32,15 @@ library(smodels)
 tracts <- read_csv("https://raw.githubusercontent.com/statsmaths/stat_data/gh-pages/acs_tract_data_2016.csv.gz")
 ```
 
-This study deals with statistics regarding the area in the continental United States generally known as "The South." THe region, which is otherwise known as "The Bible Belt", generally includes the states Arkansas, Mississippi, Alabama, Tennessee, Georgia, South Carolina, Kentucky and North Carolina. However, there are states and/or regions that are included or excluded based on which factors are being used to describe this region. For the sake of this study, only these states - as shown below - will be studied, however. 
+This study deals with statistics regarding the area in the continental United States generally known as "The South." The region, which is otherwise known as "The Bible Belt", generally includes the states Arkansas, Mississippi, Alabama, Tennessee, Georgia, South Carolina, Kentucky and North Carolina. However, there are states and/or regions that are included or excluded based on which factors are being used to describe this region. For the sake of this study, only these states - as shown below - will be studied, however. 
+
+```{r}
+qmplot(lon, lat, data = southern, geom = "blank") +
+  geom_point(aes(color="salmon"), alpha=0.075) +
+  ggtitle("The Bible Belt")
+```
+
+**Note:** This graph is used to refer the readers to the region known as the Bible Belt. It is not part of the three required graphs.
 
 In the South, there continues to be many disparities - especially those related to race and economical status - that exists today. The purpose of this study is to explore specific disarities among those living in the South. 
 
@@ -42,15 +51,14 @@ southern <- filter(tracts, state %in% c("Arkansas", "Mississippi", "Alabama", "T
 ```
 
 ## Background Information
-Racial inequality in the United States refers to social advantages and disparities that affect different races within the United States. These inequities may be manifested in the distribution of wealth, power, and life opportunities afforded to people based on their race or ethnicity, both historic and modern. These can also be seen as a result of historic oppression, inequality of inheritance, or overall prejudice, especially against minority groups.
 
-Since 1980, racial and ethnic disparities in poverty in the U.S. have remained largely unchanged, resulting in what the researchers characterize as “two Americas.”
+Racial inequality in the United States refers to social advantages and disparities that affect different races within the United States. These inequities - both historic and modern - may be manifested in the distribution of wealth, power, and educational opportunities afforded to people based on their race or ethnicity. As a result to these disparities, many sociologists have characterized the U.S. as having "two Americas."
 
 Whereas blacks, Hispanics and Native Americans are more likely to experience the high-poverty America, Asians and whites are more likely to experience the low-poverty America. 
 
 ## The South and Race 
 
-There are geographic differences between where white Americans live and where those of minority races live. Despite the many 
+There are geographic differences between where white Americans live and where those of minority races live. As a result, I decided to compare white populations and black populations to see if there was a significant correlation that existed. The below shows the black population in comparison to the white population of a certain region. The graph also shows the residing state and population of said-region. Various outliers have been noted, as well. The purpose of the graph is to see how negatively correlatedly linear the relationship between concentration of black populations and white populations are. 
 
 ```{r}
 race <- select(southern, starts_with("race_"))
@@ -62,36 +70,37 @@ southern$max_race_category <- names(southern)[apply(southern, 1, which.max)]
 ```
 
 ```{r}
+ggplot(southern, aes(race_white, race_black)) +
+  geom_point(aes(color=state, size=population)) +
+  xlab("White Population") +
+  ylab ("Black Population") +
+  ggtitle("Black vs White Population in the South") +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 1) +
+  labs(color = "Residing State", size="Population Size") +
+  annotate("text", x = 0, y = 0, label = "Birmingham-Hoover, AL")
+```
+
+As seen in the graph above, there is a correlation between the white population and those of minority populations - specifically black populations, in this case. However, the relationship is not as linear as when all the minority races are accounted for. This relationship, for comparison's sake, is provided in the graph below. From the data given, it appears that size of the population has no significant influence to this correlation, as the outliers appear to be of various sizes. It is also interesting to note that many of the outliers are from North Caroline and Kentucky. 
+
+**Note:** The graph below is not the third graph, but merely a supplement of the first graph. 
+
+```{r}
 ggplot(southern, aes(race_white, race_black + race_asian + race_ntvam + race_other +race_multi)) +
   geom_point(aes(color=state,size=population)) +
   xlab("White Population") +
   ylab ("Minority Population") +
   ggtitle("Minority vs White Population in the South") +
-  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 1) 
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 1) +
+  labs(color = "Residing State", size="Population Size")
 ```
 
-The graph above displays the relationship between concentration of white populatuib and of minority population. As shown above, there is a negative correlation between white populations and those of other races. This correlation is linear, which is reasonable due to all races being accounted for. 
+The graph above displays the relationship between concentration of white population and of minority population. As shown above, there is a negative correlation between white populations and those of other races. This correlation is linear, as all the races are accounted for. As mentioned before, this graph is merely for comparison purposes.
 
-As a result, I solely compared white populations and black populations to see if the linear relationship remained. 
-
-**Note:** The graph below is not the third graph, but merely a supplement of the first graph. 
-
-```{r}
-ggplot(southern, aes(race_white, race_black)) +
-  geom_point(aes(color=state, size=population)) +
-  xlab("White Population") +
-  ylab ("Minority Population") +
-  ggtitle("Minority vs White Population in the South") +
-  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 1) 
-```
-
-Again, there is a correlation between the white population and those of minority populations - specifically black populations, in this case. However, the relationship is not as linear as when all the minority races are accounted for. From the data given, it appears that size of the population has no significant influence to this correlation, as the outliers appear to be of various sizes. 
-
-There are several possible causes for this correlation. This relationship may be due to de facto or de jure segregation. Other causes may be due to dispairites in income or chances of receiving reasonable mortages. Because this data was not provided on the census, however, these possible correlations could not be studied for this project. 
+There are several possible causes for this correlation. This relationship may be due to de facto or de jure segregation. Other causes may be due to dispairites in income or chances of receiving reasonable mortages. Because this data was not provided on the census, however, these possible correlations could not be studied.
 
 ## The South and Racial Segregation
 
-Nonetheless, a possible explanation that could be examined by examining the relationship between net wealth and race. For most Americans, household wealth is closely tied to home equity. Home ownership helps families to accumulate wealth and to take advantage of sizable tax savings. Also, home ownership is able to be passed to later generations, allowing their children to generate further wealth. As shown by other studies, there are significant disparities in homeownership between blacks/minorities and whites.
+Nonetheless, a possible explanation that could be examined is the relationship between net wealth and race. For most Americans, household wealth is closely tied to home equity. Home ownership helps families to accumulate wealth and to take advantage of sizable tax savings. Also, home ownership is able to be passed to later generations, allowing their children to generate even further wealth. 
 
 As a result, I decided to explore the relationship between the average annual income and the percentage of white Americans residing in a certain area. In doing so, I was able to examine the Southern regions that are the most racially segregated, as well as the correlating income of these regions. 
 
@@ -110,7 +119,9 @@ southern$min_race_category <- southern$race_asian+southern$race_black+southern$r
 ```{r}
 qmplot(lon, lat, data = southern, geom = "blank") +
   geom_point(aes(color = race_white, size=(hh_income_q1+hh_income_q2+hh_income_q3+hh_income_q4)/4), alpha = 0.8) +
-  scale_color_viridis()
+  scale_color_viridis() +
+    labs(color = "Percentage of White Populations", size="Average Income") +
+  ggtitle("Average Income and Geographic Concentration of White Populations (Bible Belt)")
 ```
 
 As can be seen above, many of the more segregated regions appear to be "clumped" together. The areas that are composed of mostly white people appear to be the northern part of the Bible Belt, namely northern Arkansas, Tennesseee, and Kentucky. However, it appeared that there was no discernable correlation between average income and higher percentage of white populations. This may be due to the fact that there is no significant correlation or due to the many points that are graphed, which makes it any possible correlation hard to see for this particular graph type. 
@@ -129,12 +140,13 @@ cont_america <-filter(cont, state!="Hawaii")
 ```{r}
 qmplot(lon, lat, data = cont_america, geom = "blank") +
   geom_point(aes(color = race_white, size=(hh_income_q1+hh_income_q2+hh_income_q3+hh_income_q4)/4, alpha = 0.8)) +
-  scale_color_viridis()
+  scale_color_viridis() +
+  labs(color = "Percentage of White Populations", size="Average Income") +
+  ggtitle("Average Income and Geographic Concentration of White Populations (Continental United States)")
+
 ```
 
 Interestingly enough, there is a larger concentration of minority races in the South, in comparison to the rest of the continental United States. However, there are places outside of the "Bible Belt" region that do contain larger concentrations of minority races. 
-
-According to the United States Burea, as of 2017, the 10 states with the largest minority populations were "New York (3.3 million), Florida (3.2 million), Texas (3.2 million), Georgia (3.1 million), California (2.7 million), North Carolina (2.2 million), Illinois (2.0 million), Maryland (1.8 million), Virginia (1.7 million) and Ohio (1.5 million)" (US Census Bureau, 2018). 
 
 ## The South and Income
 
@@ -144,19 +156,23 @@ To explore the relationship between race and income disparities in the South, I 
 ggplot(southern, aes(county, hh_income_top_5)) +
   geom_point(aes(color=min_race_category)) +
   xlab("County") +
-  ylab("Top 5% Income")
+  ylab("Top 5% Income") +
+  ggtitle("Top Income and Minority Population") +
+  labs(color="Percentage of Minority Populations") +
+  annotate("rect", xmin="Bacon County", xmax="Winston County", ymin=1040000, ymax=1800000, fill="blue", alpha=.05) +
+  annotate("text", x = "Spartanburg County", y = 1700000, label = "No Minority Populations", size=6)
 ```
 
-As one can see above, the greatest income is possessed by regions with the highest percentage of white populations and lowest percentage of minority populations. However, because this graph is examining the top 5% of income, the relationship may be different for the average income and race. 
+As one can see above, the greatest income is possessed by regions with the highest percentage of white populations and lowest percentage of minority populations. As seen in the highlighted area, the highest income were not held by those who identify as a minority. However, because this graph is examining the top 5% of income, the relationship may be different for the average income and race. 
 
 ## Future Implications
 
 As soon above, rhere are many disparities that exist among various races. However, there are more racial disparity issues that could be discussed. For example, one could study racial differences in:
-- health
-- education 
-- crime rates
-- drug use
+  - health
+  - education 
+  - crime rates
+  - drug use
 
+## References
 
-
-
+Martinovich, Milenko. "Significant racial and ethnic disparities still exist, according to Stanford report." *Stanford News*, 17 June 2017, news.stanford.edu/2017/06/16/report-finds-significant-racial-ethnic-disparities/.
