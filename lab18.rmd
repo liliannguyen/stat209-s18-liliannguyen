@@ -134,7 +134,7 @@ Make sure you actually extract the answer here:
 Describe in words how the proceeding confidence interval should be
 interpreted.
 
-**Answer**: The 80% gives the probability that the how likely the age would be to that approximate mean age of 33.86 again. 
+**Answer**: The 80% gives the probability that the how likely the age would be to that approximate mean would be in the range of 33.07 and 34.65 again. 
 
 
 
