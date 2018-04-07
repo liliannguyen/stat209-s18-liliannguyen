@@ -1,7 +1,7 @@
 item,price,how_many,type
 tuna salad kit,1.63,19,food
 tuna salad kit,1.63,19,food
-tangled ,1.99,1,technology
+tangled,1.99,1,technology
 almond milk,1.99,19,food
 kashi cereal bars,2.47,19,food
 kashi cereal bars,2.47,19,food
@@ -17,8 +17,8 @@ campbell's chicken noodle soup,3.12,19,food
 campbell's chicken noodle soup,3.12,19,food
 tortilla chips,3.48,19,food
 kashi dark cocoa cereal,3.68,19,food
-tuna - four pack ,3.69,19,food
-tuna - four pack ,3.69,19,food
+tuna - four pack,3.69,19,food
+tuna - four pack,3.69,19,food
 world war z,3.99,1,technology
 insidious: chapter 1,3.99,1,fashion/makeup
 crimson peak,3.99,1,fashion/makeup
@@ -88,14 +88,14 @@ quip toothbrush,45,1,miscellanous
 navy dress,45,1,fashion/makeup
 fresh best of beauty bundle,50,1,fashion/makeup
 cooler painting kit,55,2,miscellanous
-fujifilm instax mini 9 ,55.61,2,technology
-fujifilm instax mini 9 ,55.61,2,technology
+fujifilm instax mini 9,55.61,2,technology
+fujifilm instax mini 9,55.61,2,technology
 Ecentrcq Sneaker,59.95,2,fashion/makeup
 nike flex experience,65,2,fashion/makeup
-shark jumpsuit ,68,2,fashion/makeup
+shark jumpsuit,68,2,fashion/makeup
 caudalie skin kit,79,1,fashion/makeup
 wildfox perfume,99,1,fashion/makeup
 white lace tunic,108,1,fashion/makeup
-YSL perfume ,118,1,fashion/makeup
+YSL perfume,118,1,fashion/makeup
 beats headphones,124.96,1,technology
 suede vest,140,1,fashion/makeup
