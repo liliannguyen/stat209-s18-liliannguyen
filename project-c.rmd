@@ -1,0 +1,146 @@
+---
+title: "My Shopping Habits"
+author: "Lilian Nguyen"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(ggmap)
+library(viridis)
+library(forcats)
+library(smodels)
+```
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+shop <- read_csv("https://raw.githubusercontent.com/URstats/stat209-s18-liliannguyen/master/project-c.csv")
+```
+
+## Introduction
+
+In the modern day, with the internet a heavily prevalent part of our lives, it comes to no surprise that online shopping has become extremely popular. In fact, as of 2015, Americans were reported to have spent nearly $350 billion annually on online retail purchases (Smith and Anderson, 2016).
+
+As a result, I decided to record my last 100 online purchases. 
+
+## Methods
+
+Using Google, which tracks all of my personal spending online, I recorded the last 100 items I purchased online. The items were purchased between March 30, 2018 to November 20, 2017. The amount for the individual item - excluding tax - was recorded. The total quantity of items purchased in that single order was also noted. In addition, the item was categorized into one of four options, which are listed and described below:
+
+**fashion/makeup:** This category includes any clothing and makeup purchases. 
+
+**food:** This involves anything food purchased online, such as through Amazon Pantry.
+
+**technology:** This category includes technological purchases, as well as online movies. 
+
+**miscellaneous:** This category is for items that do not fit into the other three, more specific categories. 
+
+Using the dataset, I attempted to explore three relationships: 
+
+1.) The relationship between price and type of item 
+
+2.) The relationship between how many items purchased and the type of item 
+
+3.) The relationship between price of the individual item and the number of total items.
+
+Based on my own knowledge of my personal spending habit, I developed the following hypotheses. The three hypotheses being investigated are stated below:
+
+1.) If the item being purchased falls into the category of "Fashion/makeup", it will be more expensive compared to the other categories.
+
+2.) If the item being purchased falls into the category of "Fashion/makeup", the total number of items for the order will decrease the most. 
+
+3.) If more items are being purchased, then the price of the individual items will decrease. 
+
+Because "fashion/makeup" was the most frequent type of item being purchased, I decided to use it as the baseline. The confidence level being used for the regression analyses is 95%.  
+
+## Results
+
+For the first hypothesis - "If the item being purchased falls into the category of "Fashion/makeup", it will be more expensive compared to the other categories" - the inference of the mean individual price by type of item was determined. Again, the baseline used was "Fashion/makeup." The regression table is seen below. 
+
+```{r}
+model <- lm_basic(price ~ 1 + type, data = shop)
+reg_table(model, level = 0.95)
+```
+
+As seen above, the regression table shows that the base mean is $30.891. The intercept for items belonging in the categories "food", "miscellanous", and "technology" were negative. The R-squared value is 0.1386. 
+
+The graph below demonstrates the relationship between price and type of item purchased. 
+
+```{r}
+ggplot(shop, aes(type, price)) +
+  geom_violin() +
+   xlab("Type of Item Purchased") +
+  ylab("Price of Item Purchased") +
+  ggtitle("Relationship Between Price and Type of Items Purchased")
+```
+
+As seen above, the graph displays the four categories of items that were purchased, as well as the individual price of the items. As one can see, the range of prices for "fashion/makeup" and "technology" is wider than the range for "food" and "miscellanous." The majority of items, regardless of price, appear to be in the range of 0.00-50.00 dollars. 
+
+For the second hypothesis - "If the item being purchased falls into the category of "Fashion/makeup", the total number of items for the order will decrease the most" - I examined the relationship between the number of total items in the order and the category. The regression table is seen below. 
+
+```{r}
+model <- lm_basic(how_many ~ 1 + type, data = shop)
+reg_table(model, level = 0.95)
+```
+
+The baseline mean is 2.0980 items. The slope for items belonging in the category "food" has a slope of 16.9020. The slope for "miscellanous" and "technology" is  -0.9216 and -0.8673, respectively. The R-squared value is 0.986. The graphic below visually describes the patterns seen in the regression table.  
+
+```{r}
+ggplot(shop, aes(type, how_many)) +
+  geom_violin() +
+  xlab("Type of Item Purchased") +
+  ylab("How Many Items Purchased") +
+  ggtitle("Relationship Between Number and Type of Items Purchased")
+```
+
+As  seen above, the relationship between the type of item purchased and the total number of items purchased are graphed. The graph suggests that the greatest number of items were purchased under the "Food" category. However, the graph also demonstrates that there is a low number of orders purchased in the category "food." The graph also shows that the number of items being purchased had the widest range for the category "Fashion/makeup," from approximately 1-4 items per order. In comparison, the lowest number appears to be purchases belonging to the "Miscellanous" category. There also appears to be a similar relationship between the type of item purchased and total number of items for the categories "Miscellanous" and "Technology."
+
+For the third and final hypothesis - "If more items are being purchased, then the price of the individual items will decrease" - a linear regression between the two  variables "price" and "how_many" was conducted. Due to the wide range of prices, which ranged from 1.63 to 140.00 dollars, the prices were divided into 5 bins. The base mean was calculated using the lowest bin, for the price range of 1.63 to 3.93. The regression analysis is seen below.
+
+```{r}
+model <- lm_basic(how_many ~ 1 + bin(price, 5), data = shop)
+reg_table(model, level = 0.95) 
+```
+
+As seen above, the analysis shows that the base mean is approximately 16.30 items. The slopes for the prices between 3.93-9.2, 9.2-16.6, 16.6-39.2, and 39.2-140 are -12.45, -14.70, -14.60, and-14.55, respectively. The R-squared value is 0.6966. 
+
+The graph below shows a visual representation of the regression analysis. 
+
+```{r}
+ggplot(shop, aes(bin(price, 5), how_many)) +
+  geom_violin() +
+  xlab("Price Ranges") +
+  ylab("How Many Items Purchased") +
+  ggtitle("Relationship Between Price and Number of Items Purchased")
+```
+
+As seen above, the greatest number of items were purchased when the price ranges for the individual items are relatively lower. The items with a higher price tend to have less total items purchased. Overall, it appears that regardless of price, the majority of the orders did not exceed 5 total items. It is also interesting to note that for the bins with ranges greater that $9.20, there appears to be similar relationship between the number of items purchased and the price, as none of the later 3 bins exceed 5 total items.   
+
+## Conclusions
+
+For the first hypothesis, there was evidence to suggest that there was $somewhat$ a correlation between category and price of item. The slopes for items belonging to the categories "food", "miscellanous", and "technology," were negative. This suggests that items belonging to "fashion/makeup" correlated to a higher price moreso than the other categories. However, when using the 95% confidence interval, the only significant relationship was seen for the category of "food". This suggests that it is only for the category "food," when compared to the base mean, was there a significant relationship between category and price. In addition, the R-squared value was 0.1386, which is relatively low. This suggests that there is neither a strong nor a statisically significant correlation between price of item and category. Therefore, the hypothesis was not statsically supported.
+
+While the correlation did not prove to be statistically significant and therefore the hypothesis could not be proven, there were negative slopes for the categories "food", "miscellanous", and "technology." This demonstrates that when items are purchased from these categories, there is a negative relationsip with price. These results were reasonable, as I am generally more willing to splurge on self-maintence than on other aspects of my life, such as with technological items. However, this trend may be different for other people, as their interests and priorities may differ from my own. It was also reasonable for the slope for "food" to be significant, as the price for food items are generally lower than clothes and technology. 
+
+For the second hypothesis, "if the item being purchased falls into the category of "Fashion/makeup", the total number of items for the order will decrease the most" was disproven. As seen in the regression table, items purchased under the category "Technology" had the lowest number of total items being purchased overall. This was shown to be a significant relationship. The R-squared value of 0.986 was also relatively high, suggesting that this was a statistically significant correlation.
+
+Upon further consideration, it is reasonable for this to be the category will the least amount of items purchased. This is due to the wide variety of items that fall under the category. Because the items here tend to be specific to a certain need (e.g. a cooler painting kit), they tend to be purchased from a specific site, limiting the overall amount of items I could have possibly purchased. This is why I assume that the same pattern can be seen for items falling into the category of "Technology." I had assumed that due to the amount of money spent per item for items belonging to "Fashion/makeup" was higher, less items would be purchased overall. It is this reasoning that I believe the "Food" items were significantly correlated to a greater number of items purchased. 
+
+The final hypothesis was disproven. While the items belonging to the lowest range of 1.63 to 3.93 dollars had the most items, there was not a linear relationship between number of items being purchased and the price of the individual items decreasing, as the slopes for the ranges 9.20-16.60, 16.60-39.20, and 39.20-140 dollars were similar. These relationships were considered statistically significant. Therefore, the items that cost the most did not necessarily mean the lowest number of total items purchased. It suggests that after a certain price, the negative correlation between price of the item and number of items plateaus. 
+
+I believe this is due to my common usage of Amazon Prime. Due to my subscription, I have two-day free shipping on all orders. As a result, I am able to buy the majority of items individually without having to reach a minimum amount. As a result, there is a similar amount of items purchased despite the varying prices for items with prices above $9.20. 
+
+The reason this trend is not seen in products lower than $3.93 is due to the fact that Amazon has certain items - especially those with low prices - that are considered "Add-on items." These items must be part of an order worth a certain amount before being shipped. As a result, cheaper items commonly need to be grouped together to be shipped, increasing the number of total items ordered. 
+
+## References
+
+Smith A, Anderson M. 1. Online shopping and purchasing preferences. Pew Research Center: Internet, Science & Tech. http://www.pewinternet.org/2016/12/19/online-shopping-and-purchasing-preferences/. Published December 19, 2016. 
+
+
