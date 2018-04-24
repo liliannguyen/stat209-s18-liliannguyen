@@ -1,0 +1,99 @@
+---
+title: "Relationship Between Cancer and Income"
+author: "Lilian Nguyen"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(ggmap)
+library(viridis)
+library(forcats)
+library(smodels)
+```
+
+```{r}
+cancer <- read_csv("https://statsmaths.github.io/stat_data/cancer_inc_data.csv")
+```
+
+##Introduction
+For my research, I wanted to examine if a lack of income lead to higher incidence rate of cancers. 
+
+The data dictionary for the dataset is seen below:
+
+name: the name of the county, parish, or census area
+
+state: two letter abbreviation of the state
+
+population: estimated total population
+
+breast: incidence rate per 100,000 women over 18 years of age
+
+colorectal: incidence rate per 100,000 adults over 18 years of age
+
+prostate: incidence rate per 100,000 men over 18 years of age
+
+lung: incidence rate per 100,000 men over 18 years of age
+
+melanoma: incidence rate per 100,000 men over 18 years of age
+
+poverty: percentage of households below the poverty line
+
+income: median household income
+
+region: the state’s region of the country from 9 possible categories
+
+white_alone: percentage of the county identifying as ‘white’
+
+black_alone: percentage of the county identifying as ‘black’
+
+asian_alone: percentage of the county identifying as ‘asian’
+
+lat: decimal latitude of the county centroid
+
+lon: decimal longitude of the county centroid
+
+##Data
+
+The first graph displays mean breast cancer incidence rate against mean income, by state. 
+
+```{r}
+cancersum <- group_summarize(cancer, state)
+```
+
+
+```{r}
+ggplot(cancersum, aes(income_mean, breast_mean)) +
+  geom_point(aes(color=bin(income_mean,5)), alpha=1) +
+  xlab("Income") +
+  ylab("Breast Cancer Incidence Rate") +
+  ggtitle("Income and Breast Cancer Rate") +
+  labs(color = "Mean Income") +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) 
+```
+
+As one can see, income and breast cancer rates were positively correlated. This did not support my thesis. 
+
+```{r}
+ggplot(cancersum, aes(income_mean, prostate_mean)) +
+  geom_point(aes(color="salmon"), alpha=1) +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) +
+  geom_point(aes(income_mean, melanoma_mean), color="light blue", alpha=1) +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) +
+  annotate("rect", xmin=35000, xmax=77000, ymin=65, ymax=175, color="salmon", alpha=0.1) +
+  annotate("text", x=60000, y=75, label="Prostate Cancer") +
+  annotate("rect", xmin=35000, xmax=77000, ymin=4, ymax=40, color="light blue", alpha=0.1) +
+  annotate("text", x=60000, y=46, label="Melanoma Cancer") +
+  xlab("Income") +
+  ylab("Cancer Incidence Rate") +
+  ggtitle("Income and Male Cancer Rate") 
+```
+
