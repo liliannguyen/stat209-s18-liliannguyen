@@ -15,6 +15,7 @@ library(readr)
 library(ggplot2)
 library(dplyr)
 library(ggmap)
+library(ggrepel)
 library(viridis)
 library(forcats)
 library(smodels)
@@ -25,75 +26,131 @@ cancer <- read_csv("https://statsmaths.github.io/stat_data/cancer_inc_data.csv")
 ```
 
 ##Introduction
-For my research, I wanted to examine if a lack of income lead to higher incidence rate of cancers. 
 
-The data dictionary for the dataset is seen below:
+Often, there is a negative correlation between incidence and mortality rates of various chronic diseases and income. In fact, there are numerous studies conducted that link higher income and wealth to health and longevity (Woolf et al. 2015). These health disparities are believed to be caused by the lower-income's lack of resources.
 
-name: the name of the county, parish, or census area
+Interestingly, this correlation is not seen in the incidence rate for female breast cancer. In fact, the relationship seen for other chronic diseases and income appears to be inverted in regards to income and breast cancer rate. As a result, my thesis reflects this. 
 
-state: two letter abbreviation of the state
-
-population: estimated total population
-
-breast: incidence rate per 100,000 women over 18 years of age
-
-colorectal: incidence rate per 100,000 adults over 18 years of age
-
-prostate: incidence rate per 100,000 men over 18 years of age
-
-lung: incidence rate per 100,000 men over 18 years of age
-
-melanoma: incidence rate per 100,000 men over 18 years of age
-
-poverty: percentage of households below the poverty line
-
-income: median household income
-
-region: the state’s region of the country from 9 possible categories
-
-white_alone: percentage of the county identifying as ‘white’
-
-black_alone: percentage of the county identifying as ‘black’
-
-asian_alone: percentage of the county identifying as ‘asian’
-
-lat: decimal latitude of the county centroid
-
-lon: decimal longitude of the county centroid
+**Thesis** The incidence rate of breast cancer is positively correlated to income and negatively correlated to poverty rates. This correlation is present for region, state, and county. 
 
 ##Data
 
-The first graph displays mean breast cancer incidence rate against mean income, by state. 
+To examine the relationship between income and breast cancer incidence rates, I decided to explore the relationship at a regional, state, and county level. The relationship with poverty rates and incidence rates will also be shown. In doing so, I will see if at each level, breast cancer and income are - and remain - positively correlated. It will also reveal if breast cancer and poverty are negatively correlated. 
+
+Due to the negative correlation between income and poverty (see graph below), the same graphs will be used to display the correlation of both income and poverty to breast cancer incidence rates. 
+
+```{r}
+ggplot(cancer, aes(income, poverty)) +
+  geom_point() +
+  xlab("Income") +
+  ylab("Poverty Rate") +
+  ggtitle("Relationship between Income and Poverty") +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) 
+```
+
+**Regional Level**
+
+For the regional level, the data was divided into 9 regions using the Census Bureau-designated regions. The mean income for each particular region was calculated.
+
+As seen in the graph below, there is a positive correlation between income and breast cancer rate, at the regional level. Also seen on the graph, there is a negative relationship between breast cancer incidence rate and poverty rates. The graph supports the thesis. 
+
+```{r}
+cancersumregion <- group_summarize(cancer, region)
+```
+
+```{r}
+ggplot(cancersumregion, aes(income_mean, breast_mean)) +
+  geom_point(aes(color=poverty_mean), alpha=1) +
+  xlab("Income") +
+  ylab("Breast Cancer Incidence Rate") +
+  ggtitle("Breast Cancer Rate by Region") +
+  labs(color = "Poverty Rates") +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) 
+```
+
+```{r}
+model <- lm_basic(breast_mean ~ 1 + income_mean + poverty_mean, data = cancersumregion)
+reg_table(model, level = 0.95)
+```
+
+When looking at the linear regression, however, the positive relationship between income and breast cancer rates is not a statistically significant relationship. In addition, the relationship between poverty and breast cancer proved to be insignificant as well. 
+
+This lack of statistical significance may be due to the relatively small number of samples used, as the data was divided into only 9 regions. As a result, this small sample size has a relatively larger margin of error (in comparison the study shown at the state- and county-levels). 
+
+While these correlations can be seen at a regional-level and they do indeed support my thesis, the correlations are not statistically significant. As a result, I decided to explore the state level. In doing so, I expected to see a similar patterns; also, due to the greater number of data points, I expected to see a tighter fit around the regression line. 
+
+**State Level**
 
 ```{r}
 cancersum <- group_summarize(cancer, state)
 ```
 
-
 ```{r}
 ggplot(cancersum, aes(income_mean, breast_mean)) +
-  geom_point(aes(color=bin(income_mean,5)), alpha=1) +
+  geom_point(aes(color=poverty_mean), alpha=1) +
   xlab("Income") +
   ylab("Breast Cancer Incidence Rate") +
-  ggtitle("Income and Breast Cancer Rate") +
-  labs(color = "Mean Income") +
+  ggtitle("Breast Cancer Rate by State") +
+  labs(color = "Poverty Rates") +
   geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) 
 ```
 
-As one can see, income and breast cancer rates were positively correlated. This did not support my thesis. 
-
 ```{r}
-ggplot(cancersum, aes(income_mean, prostate_mean)) +
-  geom_point(aes(color="salmon"), alpha=1) +
-  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) +
-  geom_point(aes(income_mean, melanoma_mean), color="light blue", alpha=1) +
-  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) +
-  annotate("rect", xmin=35000, xmax=77000, ymin=65, ymax=175, color="salmon", alpha=0.1) +
-  annotate("text", x=60000, y=75, label="Prostate Cancer") +
-  annotate("rect", xmin=35000, xmax=77000, ymin=4, ymax=40, color="light blue", alpha=0.1) +
-  annotate("text", x=60000, y=46, label="Melanoma Cancer") +
-  xlab("Income") +
-  ylab("Cancer Incidence Rate") +
-  ggtitle("Income and Male Cancer Rate") 
+model <- lm_basic(breast_mean ~ 1 + income_mean + poverty_mean, data = cancersum)
+reg_table(model, level = 0.95)
 ```
 
+As one can see, income and breast cancer rates were positively correlated, at the state level. However, in comparison to the slope seen at the regional level, the slope was much smaller. This suggests that the changes in breast cancer rates due to income mean was less drastic at the state level when compared to the regional level. In addition, the positive relationship between breast cancer rate and income was statistically significant. This is not seen in the regional dataset. While there appears to be a positive slope regarding poverty rates and cancer rates, there is no statistical significance seen in this relationship. The R-squared value suggests that most of the data does not fit around the regression line. 
+
+Upon further inspection of the graph above, one can see that the majority of the points do not fall onto the regression line. Due to numerous points being above and below this line, it is reasonable that this is due to, again, the large variability of income and cancer rates within a state. 
+
+Nonetheless, one can see that there appears to be a positive correlation between income and cancer rates. The graph also suggests that there is a negative correlation between poverty rates and cancer rates. Again, this data supports the proposed thesis. 
+
+**County Level**
+
+```{r}
+ggplot(cancer, aes(income, breast)) +
+  geom_point(aes(color=poverty), alpha=1) +
+  xlab("Income") +
+  ylab("Breast Cancer Incidence Rate") +
+  ggtitle("Breast Cancer Rate by County") +
+  labs(color = "Poverty") +
+  geom_smooth(method = "lm", color = "black", se = FALSE, linetype = "dashed", size = 0.5) +
+  annotate("text", x=46000, y=259, label="Charlottesville, VA", size=3)
+```
+
+As one can see from the figure above, there again exists a positive correlation between mean income and breast cancer incidence rates. Furthermore, a negative correlation between poverty and breast cancer can be seen. These relationships mirror those seen at the other two levels. 
+
+It is also interesting to note the most prominent outlier, Charlottesville (labeled above). Although further research did not provide me with a concrete explanation for this anomaly, upon examining their 2016 financial records, it was seen that four of their principal employeers were involved in the medical field. In fact, since 2007, the University of Virginia Medical Center has been the top employeer for citizens of Charlottesville City. This may have allowed for greater access to healthcare services, and therefore, greater frequency of breast cancer screening for women in that area (see Discussion section for further analysis). 
+
+```{r}
+model <- lm_basic(breast ~ 1 + income + poverty, data = cancer)
+reg_table(model, level = 0.95)
+```
+
+Again, the regression table shows that the relationship between poverty rates and breast cancer rates is not statistically significant. However, as seen at the state-level, the positive correlation between income and breast cancer rates is significant. 
+
+However, due to the variability seen in the data set, again the R-squared value suggest relatively low fit around the regression line. Nevertheless, the data appears to support the thesis. 
+
+##Discussion
+
+As of today, breast cancer is $the$ leading cause of cancer incidence among women worldwide (Britt et al., 2007). As the data above shows, affluence and breast cancer rates appear to have a positive correlation. Furthermore, as income and poverty rates are negatively correlated, poverty and breast cancer rates appear to be negatively correlated. These relationships are seen across region, state, and county, therefore supporting my thesis. 
+
+However, this study does not conclude that higher income $leads$ to higher breast cancer rates, only that the two variables are negatively correlated. Nor does this study suggests that  affluent women die from breast cancer at higher rates than for lower class women. There appears to be a very complex relationship between income and breast cancer rates. 
+
+In fact, there are numerous reasons to suggest why there appears to be a positive correlation between income and breast cancer incidence rates. For example, the higher rates for higher-income women may be due to the fact that women of higher socioeconomic status get screening mammograms at a higher rate than women of lower socioeconomic status (Monnat, 2014). Due to their greater access to affordable healthcare, as well as the financial ability to buy health insurance and other health-related services, higher-income women are more likely able to afford consistent screening mammograms. As a result, more breast cancers are found for women of higher socioeconomic status. This may explain why Charlottesville, a city whose economy is supported by the medical field, has a higher incidence rate of cancer than for the counties/cities of similar income. Other studies have pointed to certain lifestyle differences between women of varying socioeconomic status that may affect breast cancer rates. For example, women of higher-income are statistically more likely to have children at a later age, compared to women of lower-income. They are also likely to have fewer children. It has been shown in previous studies that having children earlier, as well as having more children, may reduce your risk for contradicting breast cancer. In fact, some studies state that "women having a first child before 20 years of age have a 50% reduction in lifetime breast cancer risk when compared with women who do not have children" (Britt et al., 2007). This is believed to be due missing menstrual periods, which lessens exposure to estrogen. Studies has shown estrogen to be linked to the increased presence of cancerous tumours (Britt et al., 2007). Another risk factor is also the greater prevalence of higher-class women drinking alcohol. Again, estrogen is believed to the underlying cause, as consistent alcohol consumption can increase levels of estrogen (Liu et al., 2015). When these risk factors are compounded, chances of contradicting breast cancer increase substantially (Monnat, 2014).
+
+While breast cancer may be positively correlated to income, this does mean that higher income causes higher breast cancer rates. Due to the numerous factors at play, there are a number of possible explanations for this phenomenom. Nevertheless, the data above offers an interesting puzzle regarding breast cancer rates in the United States. 
+
+##References
+Britt, K, et al. “Pregnancy and the Risk of Breast Cancer.” $Endocr Relat Cancer$, vol. 14, no. 4, Dec. 2007, pp. 907–933.
+
+“How Are Income and Wealth Linked to Health and Longevity?” $Center on Society and Health$, Apr. 2015.
+
+Krieger, Nancy. “Is Breast Cancer a Disease of Affluence, Poverty, or Both? The Case of African American Women.” $American Journal of Public Health$, vol. 92, no. 4, 2002, pp. 611–613., doi:10.2105/ajph.92.4.611.
+
+Liu, Ying, et al. “Links between Alcohol Consumption and Breast Cancer: A Look at the Evidence.” $Women's Health$, vol. 11, no. 1, 2015, pp. 65–77., doi:10.2217/whe.14.62.
+
+Ng, Chirk Jenn, et al. “Relationships between Cancer Pattern, Country Income and Geographical Region in Asia.” $BMC Cancer$, vol. 15, no. 1, Mar. 2015, doi:10.1186/s12885-015-1615-0.
+
+Monnat, Shannon M. “Race/Ethnicity and the Socioeconomic Status Gradient in Women's Cancer Screening Utilization: A Case of Diminishing Returns?” $Journal of Health Care for the Poor and Underserved$, Johns Hopkins University Press, 6 Feb. 2014, muse.jhu.edu/article/536613.
